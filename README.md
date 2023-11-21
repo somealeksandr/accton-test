@@ -7,11 +7,10 @@ composer install
 далі скопіювати env з env.example:
 
 ```
-cp env env.example
+cp env.example env 
 ```
 
-якщо потрібно поміняти конфігурацію бд
-
+якщо потрібно, поміняти конфігурацію бд в наступних рядках в файлі env:
 ```
 DB_CONNECTION=mysql
 #DB_HOST=mysql
