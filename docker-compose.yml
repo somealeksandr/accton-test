@@ -1,0 +1,68 @@
+version: "3.7"
+
+networks:
+    app-network:
+        driver: bridge
+
+volumes:
+    mysql:
+        driver: local
+
+services:
+
+    server:
+        image: adminko/test:backend
+        command: /root/server
+        container_name: accton-test-server
+        ports:
+            - "3000:3000"
+        networks:
+            - app-network
+
+    app:
+        build:
+            args:
+                user: user
+                uid: 1000
+            context: ./
+            dockerfile: Dockerfile
+        image: accton-test
+        container_name: accton-test-app
+        restart: unless-stopped
+        working_dir: /var/www/
+        depends_on:
+            - mysql
+        volumes:
+            - ./:/var/www
+        networks:
+            - app-network
+
+    mysql:
+        image: mysql:latest
+        container_name: accton-test-mysql
+        restart: unless-stopped
+        ports:
+            - 3306:3306
+        volumes:
+            - ./mysql:/var/lib/mysql
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+        networks:
+            - app-network
+
+    nginx:
+        image: nginx:alpine
+        container_name: accton-test-nginx
+        restart: unless-stopped
+        depends_on:
+            - mysql
+        ports:
+            - 8000:80
+            - 443:443
+        volumes:
+            - ./:/var/www
+            - ./docker-compose/nginx:/etc/nginx/conf.d/
+        networks:
+            - app-network
